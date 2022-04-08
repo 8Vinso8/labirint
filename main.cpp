@@ -7,6 +7,7 @@ using namespace std;
 
 int screenWidth = 120;
 int screenHeight = 40;
+
 int mapWidth = 16;
 int mapHeight = 16;
 
@@ -14,12 +15,13 @@ float playerX = 14.7;
 float playerY = 5.09;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
+
 float renderDistance = 16.0;
 
 
 int main()
 {
-    auto *screen = new char[screenWidth * screenHeight];
+    auto *screen = new wchar_t [screenWidth * screenHeight];
     HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
                                                0,
                                                nullptr,
@@ -106,45 +108,43 @@ int main()
             int ceilingDistance = (float) (screenHeight / 2.0) - screenHeight / ((float) distanceToWall);
             int floorDistance = screenHeight - ceilingDistance;
 
-            short shade = ' ';
-            if (distanceToWall <= renderDistance / 4.0f)
-                shade = 0x2588;
-            else if (distanceToWall < renderDistance / 3.0f)
-                shade = 0x2593;
-            else if (distanceToWall < renderDistance / 2.0f)
-                shade = 0x2592;
-            else if (distanceToWall < renderDistance)
-                shade = 0x2591;
-            else
-                shade = ' ';
-
-            if (hitBoundary)
-                shade = ' ';
+            short shadeChar = ' ';
+            if (!hitBoundary)
+            {
+                if (distanceToWall <= renderDistance / 4.0f)
+                    shadeChar = 0x2588;
+                else if (distanceToWall < renderDistance / 3.0f)
+                    shadeChar = 0x2593;
+                else if (distanceToWall < renderDistance / 2.0f)
+                    shadeChar = 0x2592;
+                else if (distanceToWall < renderDistance)
+                    shadeChar = 0x2591;
+            }
 
             for (int y = 0; y < screenHeight; y++)
             {
                 if (y <= ceilingDistance)
                     screen[y * screenWidth + x] = ' ';
                 else if (y > ceilingDistance && y <= floorDistance)
-                    screen[y * screenWidth + x] = shade;
+                    screen[y * screenWidth + x] = shadeChar;
                 else
                 {
                     float b = 1.0f - (((float) y - screenHeight / 2.0f) / ((float) screenHeight / 2.0f));
                     if (b < 0.25)
-                        shade = '#';
+                        shadeChar = '#';
                     else if (b < 0.5)
-                        shade = 'x';
+                        shadeChar = 'x';
                     else if (b < 0.75)
-                        shade = '.';
+                        shadeChar = '.';
                     else if (b < 0.9)
-                        shade = '-';
+                        shadeChar = '-';
                     else
-                        shade = ' ';
-                    screen[y * screenWidth + x] = shade;
+                        shadeChar = ' ';
+                    screen[y * screenWidth + x] = shadeChar;
                 }
             }
         }
-        WriteConsoleOutputCharacterA(console,
+        WriteConsoleOutputCharacterW(console,
                                      screen,
                                      screenWidth * screenHeight,
                                      {0, 0},
