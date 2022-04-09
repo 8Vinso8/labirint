@@ -19,11 +19,9 @@ float playerX = 14.7;
 float playerY = 5.09;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 5.0;
+float playerSpeed = 800.0;
 
 float renderDistance = 16.0;
-float msDelay = 15;
-
 
 int main()
 {
@@ -31,6 +29,9 @@ int main()
     initscr();
     noecho();
     curs_set(FALSE);
+    nodelay(stdscr, TRUE);
+    keypad(stdscr, TRUE);
+
     auto *screen = new wchar_t[screenWidth * screenHeight];
 
     string map;
@@ -54,45 +55,55 @@ int main()
     chrono::system_clock::time_point timePoint1 = chrono::system_clock::now();
     chrono::system_clock::time_point timePoint2 = chrono::system_clock::now();
 
+    vector<int> keysPressed;
+
     while (true)
     {
         timePoint1 = chrono::system_clock::now();
         chrono::duration<float> timeDifference = timePoint1 - timePoint2;
         float timeDifferenceNumber = timeDifference.count();
 
-        if (false)
+        int c;
+        while ((c = getch()) != ERR)
+        {
+            keysPressed.push_back(c);
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), KEY_LEFT) != keysPressed.end())
         {
             playerAngle -= (playerSpeed * 0.75f) * timeDifferenceNumber;
         }
 
-        if (false)
+        if (find(keysPressed.begin(), keysPressed.end(), KEY_RIGHT) != keysPressed.end())
         {
             playerAngle += (playerSpeed * 0.75f) * timeDifferenceNumber;
         }
 
-        if (false)
+        if (find(keysPressed.begin(), keysPressed.end(), KEY_UP) != keysPressed.end())
         {
             playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
 
-            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
                 playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
                 playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
             }
         }
 
-        if (false)
+        if (find(keysPressed.begin(), keysPressed.end(), KEY_DOWN) != keysPressed.end())
         {
             playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
 
-            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
                 playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
                 playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
             }
         }
+
+        keysPressed.clear();
 
 
         for (int x = 0; x < screenWidth; x++)
@@ -136,7 +147,8 @@ int main()
                                 p.emplace_back(d, dot);
                             }
 
-                        sort(p.begin(), p.end(), [](const pair<float, float> &left, const pair<float, float> &right) {
+                        sort(p.begin(), p.end(), [](const pair<float, float> &left, const pair<float, float> &right)
+                        {
                             return left.first < right.first;
                         });
 
@@ -195,4 +207,5 @@ int main()
     }
     return 0;
 }
+
 #pragma clang diagnostic pop
