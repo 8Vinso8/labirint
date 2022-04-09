@@ -3,8 +3,10 @@
 #include <chrono>
 #include <string>
 #include <thread>
-#include <windows.h>
+#include <ncurses.h>
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
 int screenWidth = 120;
@@ -25,15 +27,11 @@ float msDelay = 15;
 
 int main()
 {
+    setlocale(LC_ALL, "");
+    initscr();
+    noecho();
+    curs_set(FALSE);
     auto *screen = new wchar_t[screenWidth * screenHeight];
-    HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
-                                               0,
-                                               nullptr,
-                                               CONSOLE_TEXTMODE_BUFFER,
-                                               nullptr);
-    SetConsoleActiveScreenBuffer(console);
-    DWORD bytesWritten = 0;
-
 
     string map;
     map += "#########.......";
@@ -62,17 +60,17 @@ int main()
         chrono::duration<float> timeDifference = timePoint1 - timePoint2;
         float timeDifferenceNumber = timeDifference.count();
 
-        if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
+        if (false)
         {
             playerAngle -= (playerSpeed * 0.75f) * timeDifferenceNumber;
         }
 
-        if (GetAsyncKeyState((unsigned short) 'D') & 0x8000)
+        if (false)
         {
             playerAngle += (playerSpeed * 0.75f) * timeDifferenceNumber;
         }
 
-        if (GetAsyncKeyState((unsigned short) 'W') & 0x8000)
+        if (false)
         {
             playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
@@ -84,7 +82,7 @@ int main()
             }
         }
 
-        if (GetAsyncKeyState((unsigned short) 'S') & 0x8000)
+        if (false)
         {
             playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
@@ -191,22 +189,10 @@ int main()
         }
 
         timePoint2 = chrono::system_clock::now();
-        chrono::duration<double, std::milli> work_time = timePoint1 - timePoint2;
-        if (work_time.count() < msDelay)
-        {
-            std::chrono::duration<double, std::milli> delta_ms(msDelay - work_time.count());
-            auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
-            std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
-        }
-
-
-        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
-
-        WriteConsoleOutputCharacterW(console,
-                                     screen,
-                                     screenWidth * screenHeight,
-                                     {0, 0},
-                                     &bytesWritten);
+        //printw(L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
+        mvaddwstr(0, 0, screen);
+        refresh();
     }
     return 0;
 }
+#pragma clang diagnostic pop
