@@ -10,8 +10,8 @@
 #pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
-int screenWidth = 120;
-int screenHeight = 40;
+int screenWidth = 180;
+int screenHeight = 60;
 
 int mapWidth = 17;
 int mapHeight = 17;
@@ -20,7 +20,7 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 5.0;
+float playerSpeed = 4.0;
 
 float renderDistance = 17.0;
 float msDelay = 15;
@@ -190,6 +190,12 @@ int main()
 
         swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle,
                    1.0f / timeDifferenceNumber);
+        for (int nx = 0; nx < mapWidth; nx++)
+            for (int ny = 0; ny < mapWidth; ny++)
+            {
+                screen[(ny+1)*screenWidth + nx] = map[ny * mapWidth + nx];
+            }
+        screen[((int)playerX+1) * screenWidth + (int)playerY] = 'P';
 
         WriteConsoleOutputCharacterW(console,
                                      screen,
