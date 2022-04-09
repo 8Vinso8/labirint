@@ -59,9 +59,11 @@ int main()
 
     while (true)
     {
-        timePoint1 = chrono::system_clock::now();
-        chrono::duration<float> timeDifference = timePoint1 - timePoint2;
+        timePoint2 = chrono::system_clock::now();
+        chrono::duration<float> timeDifference = timePoint2 - timePoint1;
         float timeDifferenceNumber = timeDifference.count();
+        timePoint1 = timePoint2;
+
 
         int c;
         while ((c = getch()) != ERR)
@@ -199,10 +201,11 @@ int main()
                 }
             }
         }
-
-        timePoint2 = chrono::system_clock::now();
         //printw(L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
         mvaddwstr(0, 0, screen);
+        wstring fps = to_wstring((int) (1.0f / timeDifferenceNumber));
+        const wchar_t *wfps = fps.c_str();
+        mvaddwstr(0, 0, wfps);
         refresh();
     }
     return 0;
