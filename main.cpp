@@ -1,6 +1,7 @@
-#include <iostream>
 #include <cmath>
 #include <vector>
+#include <chrono>
+#include <string>
 #include <windows.h>
 
 using namespace std;
@@ -15,13 +16,14 @@ float playerX = 14.7;
 float playerY = 5.09;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
+float playerSpeed = 5.0;
 
 float renderDistance = 16.0;
 
 
 int main()
 {
-    auto *screen = new wchar_t [screenWidth * screenHeight];
+    auto *screen = new wchar_t[screenWidth * screenHeight];
     HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
                                                0,
                                                nullptr,
@@ -49,9 +51,51 @@ int main()
     map += "#..............#";
     map += "################";
 
+    chrono::system_clock::time_point timePoint1 = chrono::system_clock::now();
+    chrono::system_clock::time_point timePoint2 = chrono::system_clock::now();
+
     while (true)
     {
-        playerAngle += 0.00015f;
+        timePoint2 = chrono::system_clock::now();
+        chrono::duration<float> timeDifference = timePoint2 - timePoint1;
+        timePoint1 = timePoint2;
+        float timeDifferenceNumber = timeDifference.count();
+
+        if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
+        {
+            playerAngle -= (playerSpeed * 0.75f) * timeDifferenceNumber;
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'D') & 0x8000)
+        {
+            playerAngle += (playerSpeed * 0.75f) * timeDifferenceNumber;
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'W') & 0x8000)
+        {
+            playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+
+            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            {
+                playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            }
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'S') & 0x8000)
+        {
+            playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+
+            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            {
+                playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            }
+        }
+
+
         for (int x = 0; x < screenWidth; x++)
         {
             float rayAngle = (playerAngle - fov / 2.0f) + ((float) x / (float) screenWidth) * fov;
