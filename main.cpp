@@ -4,22 +4,25 @@
 #include <string>
 #include <thread>
 #include <windows.h>
+#include "labirint.hpp"
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
 int screenWidth = 120;
 int screenHeight = 40;
 
-int mapWidth = 16;
-int mapHeight = 16;
+int mapWidth = 17;
+int mapHeight = 17;
 
-float playerX = 14.7;
-float playerY = 5.09;
+float playerX = 2;
+float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
 float playerSpeed = 5.0;
 
-float renderDistance = 16.0;
+float renderDistance = 17.0;
 float msDelay = 15;
 
 
@@ -36,22 +39,7 @@ int main()
 
 
     string map;
-    map += "#########.......";
-    map += "#...............";
-    map += "#.......########";
-    map += "#..............#";
-    map += "#......##......#";
-    map += "#......##......#";
-    map += "#..............#";
-    map += "###............#";
-    map += "##.............#";
-    map += "#......####..###";
-    map += "#......#.......#";
-    map += "#......#.......#";
-    map += "#..............#";
-    map += "#......#########";
-    map += "#..............#";
-    map += "################";
+    map = Generate();
 
     chrono::system_clock::time_point timePoint1 = chrono::system_clock::now();
     chrono::system_clock::time_point timePoint2 = chrono::system_clock::now();
@@ -77,7 +65,7 @@ int main()
             playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
 
-            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
                 playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
                 playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
@@ -89,7 +77,7 @@ int main()
             playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
             playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
 
-            if (map.c_str()[(int)playerX * mapWidth + (int)playerY] != '.')
+            if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
                 playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
                 playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
@@ -131,8 +119,8 @@ int main()
                         for (int tx = 0; tx < 2; tx++)
                             for (int ty = 0; ty < 2; ty++)
                             {
-                                float vy = (float) testY + ty - playerY;
-                                float vx = (float) testX + tx - playerX;
+                                float vy = (float) testY + (float) ty - playerY;
+                                float vx = (float) testX + (float) tx - playerX;
                                 float d = sqrt(vx * vx + vy * vy);
                                 float dot = (eyeX * vx / d) + (eyeY * vy / d);
                                 p.emplace_back(d, dot);
@@ -150,7 +138,7 @@ int main()
                 }
             }
 
-            int ceilingDistance = (float) (screenHeight / 2.0) - screenHeight / ((float) distanceToWall);
+            int ceilingDistance = (float) ((float)screenHeight / 2.0f) - (float) screenHeight / ((float) distanceToWall);
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
@@ -174,7 +162,7 @@ int main()
                     screen[y * screenWidth + x] = shadeChar;
                 else
                 {
-                    float b = 1.0f - (((float) y - screenHeight / 2.0f) / ((float) screenHeight / 2.0f));
+                    float b = 1.0f - (((float) y - (float) screenHeight / 2.0f) / ((float) screenHeight / 2.0f));
                     if (b < 0.25)
                         shadeChar = '#';
                     else if (b < 0.5)
@@ -200,7 +188,8 @@ int main()
         }
 
 
-        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
+        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle,
+                   1.0f / timeDifferenceNumber);
 
         WriteConsoleOutputCharacterW(console,
                                      screen,
@@ -210,3 +199,5 @@ int main()
     }
     return 0;
 }
+
+#pragma clang diagnostic pop
