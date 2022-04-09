@@ -35,15 +35,13 @@ bool deadend(int x, int y, int** maze, int height, int width){
 }
 
 string visual(int** maze, int height, int width){ //отрисовка лабиринта в строчку
-    string arr[5] = {"@", "$", "*", "^", "&"};
     string ret;
     int a;
     for(int i = 0; i < height; i++){
         for(int j = 0; j < width; j++)
             switch(maze[i][j]){
                 case wall:
-                    a = rand() % 5;
-                    ret += arr[a];
+                    ret += '#';
                     break;
                 case pass:
                     ret += ".";
