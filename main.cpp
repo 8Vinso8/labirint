@@ -2,6 +2,7 @@
 #include <vector>
 #include <chrono>
 #include <string>
+#include <thread>
 #include <windows.h>
 
 using namespace std;
@@ -19,6 +20,7 @@ float fov = numbers::pi / 4.0;
 float playerSpeed = 5.0;
 
 float renderDistance = 16.0;
+float msDelay = 15;
 
 
 int main()
@@ -56,9 +58,8 @@ int main()
 
     while (true)
     {
-        timePoint2 = chrono::system_clock::now();
-        chrono::duration<float> timeDifference = timePoint2 - timePoint1;
-        timePoint1 = timePoint2;
+        timePoint1 = chrono::system_clock::now();
+        chrono::duration<float> timeDifference = timePoint1 - timePoint2;
         float timeDifferenceNumber = timeDifference.count();
 
         if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
@@ -188,6 +189,19 @@ int main()
                 }
             }
         }
+
+        timePoint2 = chrono::system_clock::now();
+        chrono::duration<double, std::milli> work_time = timePoint1 - timePoint2;
+        if (work_time.count() < msDelay)
+        {
+            std::chrono::duration<double, std::milli> delta_ms(msDelay - work_time.count());
+            auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
+            std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
+        }
+
+
+        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
+
         WriteConsoleOutputCharacterW(console,
                                      screen,
                                      screenWidth * screenHeight,
