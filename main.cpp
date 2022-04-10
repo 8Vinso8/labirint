@@ -6,8 +6,7 @@
 #include <windows.h>
 #include "labirint.hpp"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+
 using namespace std;
 
 int screenWidth = 180;
@@ -20,14 +19,13 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 4.0;
+float playerSpeed = 0.1f;
 
 float renderDistance = 17.0;
-float msDelay = 15;
-
 
 int main()
 {
+
     auto *screen = new wchar_t[screenWidth * screenHeight];
     HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
                                                0,
@@ -37,50 +35,58 @@ int main()
     SetConsoleActiveScreenBuffer(console);
     DWORD bytesWritten = 0;
 
-
     string map;
     map = Generate();
 
-    chrono::system_clock::time_point timePoint1 = chrono::system_clock::now();
-    chrono::system_clock::time_point timePoint2 = chrono::system_clock::now();
+
+
+    auto tp1 = chrono::system_clock::now();
+    auto tp2 = chrono::system_clock::now();
+
+    using clock = std::chrono::steady_clock;
+    auto next_frame = clock::now();
 
     while (true)
     {
-        timePoint1 = chrono::system_clock::now();
-        chrono::duration<float> timeDifference = timePoint1 - timePoint2;
-        float timeDifferenceNumber = timeDifference.count();
+        next_frame += std::chrono::milliseconds(1000 / 60);
+
+
+        tp2 = chrono::system_clock::now();
+        chrono::duration<float> elapsedTime = tp2 - tp1;
+        tp1 = tp2;
+        float fElapsedTime = elapsedTime.count();
 
         if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
         {
-            playerAngle -= (playerSpeed * 0.75f) * timeDifferenceNumber;
+            playerAngle -= (playerSpeed * 0.5f);
         }
 
         if (GetAsyncKeyState((unsigned short) 'D') & 0x8000)
         {
-            playerAngle += (playerSpeed * 0.75f) * timeDifferenceNumber;
+            playerAngle += (playerSpeed * 0.5f);
         }
 
         if (GetAsyncKeyState((unsigned short) 'W') & 0x8000)
         {
-            playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-            playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerX += sinf(playerAngle) * playerSpeed;
+            playerY += cosf(playerAngle) * playerSpeed;
 
             if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
-                playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-                playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerX -= sinf(playerAngle) * playerSpeed;
+                playerY -= cosf(playerAngle) * playerSpeed;
             }
         }
 
         if (GetAsyncKeyState((unsigned short) 'S') & 0x8000)
         {
-            playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-            playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerX -= sinf(playerAngle) * playerSpeed;
+            playerY -= cosf(playerAngle) * playerSpeed;
 
             if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
-                playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-                playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerX += sinf(playerAngle) * playerSpeed;
+                playerY += cosf(playerAngle) * playerSpeed;
             }
         }
 
@@ -138,7 +144,8 @@ int main()
                 }
             }
 
-            int ceilingDistance = (float) ((float)screenHeight / 2.0f) - (float) screenHeight / ((float) distanceToWall);
+            int ceilingDistance =
+                    (float) ((float) screenHeight / 2.0f) - (float) screenHeight / ((float) distanceToWall);
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
@@ -178,32 +185,23 @@ int main()
             }
         }
 
-        timePoint2 = chrono::system_clock::now();
-        chrono::duration<double, std::milli> work_time = timePoint1 - timePoint2;
-        if (work_time.count() < msDelay)
-        {
-            std::chrono::duration<double, std::milli> delta_ms(msDelay - work_time.count());
-            auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
-            std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
-        }
+        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/fElapsedTime);
 
-
-        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle,
-                   1.0f / timeDifferenceNumber);
         for (int nx = 0; nx < mapWidth; nx++)
             for (int ny = 0; ny < mapWidth; ny++)
             {
-                screen[(ny+1)*screenWidth + nx] = map[ny * mapWidth + nx];
+                screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
             }
-        screen[((int)playerX+1) * screenWidth + (int)playerY] = 'P';
+        screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
 
         WriteConsoleOutputCharacterW(console,
                                      screen,
                                      screenWidth * screenHeight,
                                      {0, 0},
                                      &bytesWritten);
+
+
+        std::this_thread::sleep_until(next_frame);
     }
     return 0;
 }
-
-#pragma clang diagnostic pop
