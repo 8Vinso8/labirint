@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include <windows.h>
+
 #include "labirint.hpp"
 
 
@@ -47,15 +48,21 @@ int main()
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();
 
-    while (true)
+    bool runGame = true;
+    while (runGame)
     {
         next_frame += std::chrono::milliseconds(1000 / FPS);
-
 
         tp2 = chrono::system_clock::now();
         chrono::duration<float> elapsedTime = tp2 - tp1;
         tp1 = tp2;
         float fElapsedTime = elapsedTime.count();
+
+        if (GetAsyncKeyState(VK_ESCAPE))
+        {
+            runGame = false;
+            continue;
+        }
 
         if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
         {
