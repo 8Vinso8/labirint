@@ -19,7 +19,8 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 0.1f;
+int FPS = 60;
+float playerSpeed = 0.1f / ((float)FPS / 60.0f);
 
 float renderDistance = 17.0;
 
@@ -48,7 +49,7 @@ int main()
 
     while (true)
     {
-        next_frame += std::chrono::milliseconds(1000 / 60);
+        next_frame += std::chrono::milliseconds(1000 / FPS);
 
 
         tp2 = chrono::system_clock::now();
