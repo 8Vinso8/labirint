@@ -16,14 +16,16 @@ int screenHeight = 60;
 int mapWidth = 17;
 int mapHeight = 17;
 
+int FPS = 60;
+
 float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-int FPS = 60;
-float playerSpeed = 0.1f / ((float)FPS / 60.0f);
+float playerSpeed = 0.1f / ((float) FPS / 60.0f);
 
 float renderDistance = 17.0;
+
 
 int main()
 {
@@ -41,7 +43,6 @@ int main()
     map = Generate();
 
 
-
     auto tp1 = chrono::system_clock::now();
     auto tp2 = chrono::system_clock::now();
 
@@ -49,6 +50,7 @@ int main()
     auto next_frame = clock::now();
 
     bool runGame = true;
+
     while (runGame)
     {
         next_frame += std::chrono::milliseconds(1000 / FPS);
@@ -152,8 +154,8 @@ int main()
                 }
             }
 
-            int ceilingDistance =
-                    (float) ((float) screenHeight / 2.0f) - (float) screenHeight / ((float) distanceToWall);
+            int ceilingDistance = (int) (((float) screenHeight / 2.0f) -
+                                           (float) screenHeight / ((float) distanceToWall));
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
@@ -193,7 +195,8 @@ int main()
             }
         }
 
-        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/fElapsedTime);
+        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle,
+                   1.0f / fElapsedTime);
 
         for (int nx = 0; nx < mapWidth; nx++)
             for (int ny = 0; ny < mapWidth; ny++)
