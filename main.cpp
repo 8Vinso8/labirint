@@ -9,17 +9,19 @@
 #pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
-int screenWidth = 120;
-int screenHeight = 40;
+int screenWidth = 180;
+int screenHeight = 60;
 
 int mapWidth = 16;
 int mapHeight = 16;
 
-float playerX = 14.7;
-float playerY = 5.09;
+int FPS = 60;
+
+float playerX = 2;
+float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 800.0;
+float playerSpeed = 0.1f / ((float) FPS / 60.0f);
 
 float renderDistance = 16.0;
 
@@ -52,17 +54,25 @@ int main()
     map += "#..............#";
     map += "################";
 
-    chrono::system_clock::time_point timePoint1 = chrono::system_clock::now();
-    chrono::system_clock::time_point timePoint2 = chrono::system_clock::now();
+
+    auto tp1 = chrono::system_clock::now();
+    auto tp2 = chrono::system_clock::now();
+
+    using clock = std::chrono::steady_clock;
+    auto next_frame = clock::now();
+
+    bool runGame = true;
 
     vector<int> keysPressed;
 
-    while (true)
+    while (runGame)
     {
-        timePoint2 = chrono::system_clock::now();
-        chrono::duration<float> timeDifference = timePoint2 - timePoint1;
-        float timeDifferenceNumber = timeDifference.count();
-        timePoint1 = timePoint2;
+        next_frame += std::chrono::milliseconds(1000 / FPS);
+
+        tp2 = chrono::system_clock::now();
+        chrono::duration<float> elapsedTime = tp2 - tp1;
+        tp1 = tp2;
+        float fElapsedTime = elapsedTime.count();
 
 
         int c;
@@ -73,35 +83,35 @@ int main()
 
         if (find(keysPressed.begin(), keysPressed.end(), KEY_LEFT) != keysPressed.end())
         {
-            playerAngle -= (playerSpeed * 0.75f) * timeDifferenceNumber;
+            playerAngle -= (playerSpeed * 0.75f);
         }
 
         if (find(keysPressed.begin(), keysPressed.end(), KEY_RIGHT) != keysPressed.end())
         {
-            playerAngle += (playerSpeed * 0.75f) * timeDifferenceNumber;
+            playerAngle += (playerSpeed * 0.75f);
         }
 
         if (find(keysPressed.begin(), keysPressed.end(), KEY_UP) != keysPressed.end())
         {
-            playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-            playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerX += sinf(playerAngle) * playerSpeed;
+            playerY += cosf(playerAngle) * playerSpeed;
 
             if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
-                playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-                playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerX -= sinf(playerAngle) * playerSpeed;
+                playerY -= cosf(playerAngle) * playerSpeed;
             }
         }
 
         if (find(keysPressed.begin(), keysPressed.end(), KEY_DOWN) != keysPressed.end())
         {
-            playerX -= sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-            playerY -= cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+            playerX -= sinf(playerAngle) * playerSpeed;
+            playerY -= cosf(playerAngle) * playerSpeed;
 
             if (map.c_str()[(int) playerX * mapWidth + (int) playerY] != '.')
             {
-                playerX += sinf(playerAngle) * playerSpeed * timeDifferenceNumber;
-                playerY += cosf(playerAngle) * playerSpeed * timeDifferenceNumber;
+                playerX += sinf(playerAngle) * playerSpeed;
+                playerY += cosf(playerAngle) * playerSpeed;
             }
         }
 
@@ -142,8 +152,8 @@ int main()
                         for (int tx = 0; tx < 2; tx++)
                             for (int ty = 0; ty < 2; ty++)
                             {
-                                float vy = (float) testY + ty - playerY;
-                                float vx = (float) testX + tx - playerX;
+                                float vy = (float) testY + (float) ty - playerY;
+                                float vx = (float) testX + (float) tx - playerX;
                                 float d = sqrt(vx * vx + vy * vy);
                                 float dot = (eyeX * vx / d) + (eyeY * vy / d);
                                 p.emplace_back(d, dot);
@@ -162,7 +172,8 @@ int main()
                 }
             }
 
-            int ceilingDistance = (float) (screenHeight / 2.0) - screenHeight / ((float) distanceToWall);
+            int ceilingDistance = (int) ((float) (screenHeight / 2.0) -
+                                         (float) screenHeight / ((float) distanceToWall));
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
@@ -186,7 +197,7 @@ int main()
                     screen[y * screenWidth + x] = shadeChar;
                 else
                 {
-                    float b = 1.0f - (((float) y - screenHeight / 2.0f) / ((float) screenHeight / 2.0f));
+                    float b = 1.0f - (((float) y - (float) screenHeight / 2.0f) / ((float) screenHeight / 2.0f));
                     if (b < 0.25)
                         shadeChar = '#';
                     else if (b < 0.5)
@@ -203,10 +214,12 @@ int main()
         }
         //printw(L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
         mvaddwstr(0, 0, screen);
-        wstring fps = to_wstring((int) (1.0f / timeDifferenceNumber));
+        wstring fps = to_wstring((int) (1.0f / fElapsedTime));
         const wchar_t *wfps = fps.c_str();
         mvaddwstr(0, 0, wfps);
+        std::this_thread::sleep_until(next_frame);
         refresh();
+
     }
     return 0;
 }
