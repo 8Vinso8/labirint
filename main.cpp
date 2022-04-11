@@ -22,14 +22,13 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 0.1f / ((float) FPS / 60.0f);
+float playerSpeed = 0.1f;
 
 float renderDistance = 17.0;
 
 
 int main()
 {
-
     auto *screen = new wchar_t[screenWidth * screenHeight];
     HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
                                                0,
@@ -40,16 +39,104 @@ int main()
     DWORD bytesWritten = 0;
 
     string map;
-    map = Generate();
-
-
-    auto tp1 = chrono::system_clock::now();
-    auto tp2 = chrono::system_clock::now();
 
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();
 
     bool runGame = true;
+
+    int menuIndex = 0;
+
+    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " };
+    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     };
+    vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                };
+
+    wstring blank = wstring(screenWidth, ' ');
+    const wchar_t *wblank = blank.c_str();
+
+    while(runGame)
+    {
+        next_frame += std::chrono::milliseconds(1000 / 10);
+
+        if (GetAsyncKeyState(VK_SPACE))
+        {
+            if (menuName[menuIndex] == L"Start")
+            {
+                runGame = false;
+                continue;
+            }
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
+        {
+            if (menuVar[menuIndex] != nullptr)
+            {
+                if (*menuVar[menuIndex] - increment[menuIndex] > 0)
+                {
+                    *menuVar[menuIndex] -= increment[menuIndex];
+                }
+            }
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'D') & 0x8000)
+        {
+            if (menuVar[menuIndex] != nullptr)
+            {
+                *menuVar[menuIndex] += increment[menuIndex];
+            }
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'W') & 0x8000)
+        {
+            menuIndex  = menuIndex - 1 < 0 ? menuName.size() - 1 : menuIndex - 1;
+        }
+
+        if (GetAsyncKeyState((unsigned short) 'S') & 0x8000)
+        {
+            menuIndex  = (menuIndex + 1) % menuName.size();
+        }
+        // clear();
+        for (int i = 0; i < menuName.size(); i++)
+        {
+            wstring name = menuName[i];
+            if (menuVar[i] != nullptr)
+            {
+                name += to_wstring(*menuVar[i]);
+            }
+            const wchar_t *wname = name.c_str();
+            WriteConsoleOutputCharacterW(console,
+                                         wblank,
+                                         screenWidth,
+                                         {0, static_cast<SHORT>(i)},
+                                         &bytesWritten);
+            WriteConsoleOutputCharacterW(console,
+                                         wname,
+                                         name.size(),
+                                         {0, static_cast<SHORT>(i)},
+                                         &bytesWritten);
+        }
+        WriteConsoleOutputCharacterW(console,
+                                     L"<---",
+                                     4,
+                                     {40, static_cast<SHORT>(menuIndex)},
+                                     &bytesWritten);
+        std::this_thread::sleep_until(next_frame);
+    }
+
+    map = Generate(mapHeight, mapWidth);
+
+    runGame = true;
+
+    playerSpeed = playerSpeed / ((float) FPS / 60.0f);
+
+    map = Generate();
+
+    using clock = std::chrono::steady_clock;
+    auto tp1 = chrono::system_clock::now();
+    auto tp2 = chrono::system_clock::now();
+    next_frame = clock::now();
+
+    runGame = true;
 
     while (runGame)
     {
@@ -157,7 +244,6 @@ int main()
             int ceilingDistance = (int) (((float) screenHeight / 2.0f) -
                                            (float) screenHeight / ((float) distanceToWall));
             int floorDistance = screenHeight - ceilingDistance;
-
             short shadeChar = ' ';
             if (!hitBoundary)
             {
@@ -195,8 +281,7 @@ int main()
             }
         }
 
-        swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle,
-                   1.0f / fElapsedTime);
+        swprintf_s(screen, 40, L"FPS=%3.2f ", 1.0f / fElapsedTime);
 
         for (int nx = 0; nx < mapWidth; nx++)
             for (int ny = 0; ny < mapWidth; ny++)
@@ -210,7 +295,6 @@ int main()
                                      screenWidth * screenHeight,
                                      {0, 0},
                                      &bytesWritten);
-
 
         std::this_thread::sleep_until(next_frame);
     }
