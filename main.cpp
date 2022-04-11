@@ -4,16 +4,17 @@
 #include <string>
 #include <thread>
 #include <ncurses.h>
+#include "labirint.hpp"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
-int screenWidth = 180;
-int screenHeight = 60;
+int screenWidth = 120;
+int screenHeight = 40;
 
-int mapWidth = 16;
-int mapHeight = 16;
+int mapWidth = 17;
+int mapHeight = 17;
 
 int FPS = 60;
 
@@ -21,7 +22,7 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 0.1f / ((float) FPS / 60.0f);
+float playerSpeed = 0.1f;
 
 float renderDistance = 16.0;
 
@@ -34,29 +35,7 @@ int main()
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
 
-    auto *screen = new wchar_t[screenWidth * screenHeight];
-
     string map;
-    map += "#########.......";
-    map += "#...............";
-    map += "#.......########";
-    map += "#..............#";
-    map += "#......##......#";
-    map += "#......##......#";
-    map += "#..............#";
-    map += "###............#";
-    map += "##.............#";
-    map += "#......####..###";
-    map += "#......#.......#";
-    map += "#......#.......#";
-    map += "#..............#";
-    map += "#......#########";
-    map += "#..............#";
-    map += "################";
-
-
-    auto tp1 = chrono::system_clock::now();
-    auto tp2 = chrono::system_clock::now();
 
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();
@@ -64,6 +43,92 @@ int main()
     bool runGame = true;
 
     vector<int> keysPressed;
+
+    int menuIndex = 0;
+
+    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " };
+    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     };
+    vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                };
+
+    while(runGame)
+    {
+        next_frame += std::chrono::milliseconds(1000 / FPS);
+
+        keysPressed.clear();
+        int c;
+        while ((c = getch()) != ERR)
+        {
+            keysPressed.push_back(c);
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), 10) != keysPressed.end())  // 27 - ESC
+        {
+            if (menuName[menuIndex] == L"Start")
+            {
+                runGame = false;
+                continue;
+            }
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), 97) != keysPressed.end()) // 97 - A
+        {
+            if (menuVar[menuIndex] != nullptr)
+            {
+                if (*menuVar[menuIndex] - increment[menuIndex] > 0)
+                {
+                    *menuVar[menuIndex] -= increment[menuIndex];
+                }
+            }
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), 100) != keysPressed.end()) // 100 - D
+        {
+            if (menuVar[menuIndex] != nullptr)
+            {
+                *menuVar[menuIndex] += increment[menuIndex];
+            }
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), 119) != keysPressed.end()) // 119 - W
+        {
+            menuIndex  = menuIndex - 1 < 0 ? menuName.size() - 1 : menuIndex - 1;
+        }
+
+        if (find(keysPressed.begin(), keysPressed.end(), 115) != keysPressed.end()) // 115 - S
+        {
+            menuIndex  = (menuIndex + 1) % menuName.size();
+        }
+        clear();
+        for (int i = 0; i < menuName.size(); i++)
+        {
+            wstring name = menuName[i];
+            if (menuVar[i] != nullptr)
+            {
+                name += to_wstring(*menuVar[i]);
+            }
+            const wchar_t *wname = name.c_str();
+            mvaddwstr(i, 0, wname);
+        }
+        mvaddwstr(menuIndex, 40, L"<---");
+        std::this_thread::sleep_until(next_frame);
+        refresh();
+    }
+
+    map = Generate(mapHeight, mapWidth);
+
+    auto *screen = new wchar_t[screenWidth * screenHeight];
+
+    using clock = std::chrono::steady_clock;
+    next_frame = clock::now();
+    auto tp1 = chrono::system_clock::now();
+    auto tp2 = chrono::system_clock::now();
+
+    runGame = true;
+
+    keysPressed.clear();
+
+    //playerSpeed = playerSpeed / ((float) FPS / 60.0f); - не имеет смысла с NCURSES
+
 
     while (runGame)
     {
@@ -87,17 +152,17 @@ int main()
             continue;
         }
 
-        if (find(keysPressed.begin(), keysPressed.end(), KEY_LEFT) != keysPressed.end())
+        if (find(keysPressed.begin(), keysPressed.end(), 97) != keysPressed.end()) // 97 - A
         {
             playerAngle -= (playerSpeed * 0.75f);
         }
 
-        if (find(keysPressed.begin(), keysPressed.end(), KEY_RIGHT) != keysPressed.end())
+        if (find(keysPressed.begin(), keysPressed.end(), 100) != keysPressed.end()) // 100 - D
         {
             playerAngle += (playerSpeed * 0.75f);
         }
 
-        if (find(keysPressed.begin(), keysPressed.end(), KEY_UP) != keysPressed.end())
+        if (find(keysPressed.begin(), keysPressed.end(), 119) != keysPressed.end()) // 119 - W
         {
             playerX += sinf(playerAngle) * playerSpeed;
             playerY += cosf(playerAngle) * playerSpeed;
@@ -109,7 +174,7 @@ int main()
             }
         }
 
-        if (find(keysPressed.begin(), keysPressed.end(), KEY_DOWN) != keysPressed.end())
+        if (find(keysPressed.begin(), keysPressed.end(), 115) != keysPressed.end()) // 115 - S
         {
             playerX -= sinf(playerAngle) * playerSpeed;
             playerY -= cosf(playerAngle) * playerSpeed;
@@ -217,12 +282,22 @@ int main()
                 }
             }
         }
-        //printw(L"X=%3.2f, Y=%3.2f, A=%3.2f FPS=%3.2f ", playerX, playerY, playerAngle, 1.0f/timeDifferenceNumber);
+
+        for (int nx = 0; nx < mapWidth; nx++)
+            for (int ny = 0; ny < mapHeight; ny++)
+            {
+                screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
+            }
+        screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
+
         mvaddwstr(0, 0, screen);
+
         wstring fps = to_wstring((int) (1.0f / fElapsedTime));
         const wchar_t *wfps = fps.c_str();
         mvaddwstr(0, 0, wfps);
+
         std::this_thread::sleep_until(next_frame);
+
         refresh();
 
     }
