@@ -81,6 +81,12 @@ int main()
             keysPressed.push_back(c);
         }
 
+        if (find(keysPressed.begin(), keysPressed.end(), 27) != keysPressed.end())  // 27 - ESC
+        {
+            runGame = false;
+            continue;
+        }
+
         if (find(keysPressed.begin(), keysPressed.end(), KEY_LEFT) != keysPressed.end())
         {
             playerAngle -= (playerSpeed * 0.75f);
@@ -172,8 +178,7 @@ int main()
                 }
             }
 
-            int ceilingDistance = (int) ((float) (screenHeight / 2.0) -
-                                         (float) screenHeight / ((float) distanceToWall));
+            int ceilingDistance = (int) ((float) (screenHeight / 2.0) - (float)screenHeight / ((float) distanceToWall));
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
