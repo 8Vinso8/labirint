@@ -22,9 +22,11 @@ float playerX = 2;
 float playerY = 2;
 float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
-float playerSpeed = 0.1f;
+float playerSpeed = 0.05f;
 
-float renderDistance = 17.0;
+int renderDistance = 17.0;
+bool miniMap = true;
+wstring mapStr = L"YES";
 
 
 int main()
@@ -47,8 +49,8 @@ int main()
 
     int menuIndex = 0;
 
-    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " };
-    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     };
+    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " , L"RenderDistance:2", L"Minimap:" };
+    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight  , &renderDistance, nullptr};
     vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                };
 
     wstring blank = wstring(screenWidth, ' ');
@@ -64,6 +66,10 @@ int main()
             {
                 runGame = false;
                 continue;
+            }
+            if (menuName[menuIndex] == L"Minimap:"){
+                mapStr = mapStr == L"YES" ? L"NO" : L"YES";
+                miniMap = mapStr == L"YES";
             }
         }
 
@@ -102,6 +108,9 @@ int main()
             if (menuVar[i] != nullptr)
             {
                 name += to_wstring(*menuVar[i]);
+            }
+            if (menuName[i] == L"Minimap:"){
+                name += mapStr;
             }
             const wchar_t *wname = name.c_str();
             WriteConsoleOutputCharacterW(console,
@@ -283,13 +292,13 @@ int main()
 
         swprintf_s(screen, 40, L"FPS=%3.2f ", 1.0f / fElapsedTime);
 
-        for (int nx = 0; nx < mapWidth; nx++)
-            for (int ny = 0; ny < mapWidth; ny++)
-            {
-                screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
-            }
-        screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
-
+        if (miniMap) {
+            for (int nx = 0; nx < mapWidth; nx++)
+                for (int ny = 0; ny < mapWidth; ny++) {
+                    screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
+                }
+            screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
+        }
         WriteConsoleOutputCharacterW(console,
                                      screen,
                                      screenWidth * screenHeight,
