@@ -10,32 +10,33 @@
 #pragma ide diagnostic ignored "EndlessLoop"
 using namespace std;
 
-int screenWidth = 120;
-int screenHeight = 40;
-
-int mapWidth = 17;
-int mapHeight = 17;
-
-int FPS = 60;
-
-float playerX = 2;
-float playerY = 2;
-float playerAngle = 0.0;
-float fov = numbers::pi / 4.0;
-float playerSpeed = 0.1f;
-
-int renderDistance = 16.0;
-bool miniMap = true;
-wstring mapStr = L"YES";
-
 int main()
 {
+    int screenWidth = 120;
+    int screenHeight = 40;
+
+    int mapWidth = 17;
+    int mapHeight = 17;
+
+    int FPS = 60;
+
+    float playerX = 2;
+    float playerY = 2;
+    float playerAngle = 0.0;
+    float fov = numbers::pi / 4.0;
+    float playerSpeed = 0.1f;
+
+    int renderDistance = 16.0;
+
     setlocale(LC_ALL, "");
     initscr();
     noecho();
     curs_set(FALSE);
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
+
+    wstring mapStr = L"YES";
+    bool miniMap = true;
 
     string map;
 
@@ -52,7 +53,7 @@ int main()
                                 L"RenderDistance:2", L"Minimap:"};
     vector<int *> menuVar = {nullptr, &mapWidth, &mapHeight, &FPS, &screenWidth, &screenHeight, &renderDistance,
                              nullptr};
-    vector<int> increment = {NULL, 2, 2, 30, 10, 10, 2, NULL};
+    vector<int> increment = {0, 2, 2, 30, 10, 10, 2, 0};
 
     while (runGame)
     {
@@ -215,13 +216,13 @@ int main()
             float eyeX = sinf(rayAngle);
             float eyeY = cosf(rayAngle);
 
-            while (!hitWall && distanceToWall < renderDistance)
+            while (!hitWall and distanceToWall < renderDistance)
             {
                 distanceToWall += stepSize;
                 int testX = (int) (playerX + eyeX * distanceToWall);
                 int testY = (int) (playerY + eyeY * distanceToWall);
 
-                if (testX < 0 || testX >= mapWidth || testY < 0 || testY >= mapHeight)
+                if (testX < 0 or testX >= mapWidth or testY < 0 or testY >= mapHeight)
                 {
                     hitWall = true;
                     distanceToWall = renderDistance;
@@ -277,7 +278,7 @@ int main()
             {
                 if (y <= ceilingDistance)
                     screen[y * screenWidth + x] = ' ';
-                else if (y > ceilingDistance && y <= floorDistance)
+                else if (y > ceilingDistance and y <= floorDistance)
                     screen[y * screenWidth + x] = shadeChar;
                 else
                 {
