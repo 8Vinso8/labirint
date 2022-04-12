@@ -48,7 +48,7 @@ int main()
 
     int menuIndex = 0;
 
-    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " , L"RenderDistance:", L"Minimap:"};
+    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " , L"RenderDistance:2", L"Minimap:"};
     vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     , &renderDistance,
                                  nullptr};
     vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                , 2, NULL};
