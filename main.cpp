@@ -48,12 +48,13 @@ int main()
 
     int menuIndex = 0;
 
-    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " , L"RenderDistance:2", L"Minimap:"};
-    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     , &renderDistance,
-                                 nullptr};
-    vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                , 2, NULL};
+    vector<wstring> menuName = {L"Start", L"MapWidth: ", L"MapHeight: ", L"FPS: ", L"ScreenWidth: ", L"ScreenHeight: ",
+                                L"RenderDistance:2", L"Minimap:"};
+    vector<int *> menuVar = {nullptr, &mapWidth, &mapHeight, &FPS, &screenWidth, &screenHeight, &renderDistance,
+                             nullptr};
+    vector<int> increment = {NULL, 2, 2, 30, 10, 10, 2, NULL};
 
-    while(runGame)
+    while (runGame)
     {
         next_frame += std::chrono::milliseconds(1000 / FPS);
 
@@ -71,7 +72,8 @@ int main()
                 runGame = false;
                 continue;
             }
-            if (menuName[menuIndex] == L"Minimap:"){
+            if (menuName[menuIndex] == L"Minimap:")
+            {
                 mapStr = mapStr == L"YES" ? L"NO" : L"YES";
                 miniMap = mapStr == L"YES";
             }
@@ -98,12 +100,12 @@ int main()
 
         if (find(keysPressed.begin(), keysPressed.end(), 119) != keysPressed.end()) // 119 - W
         {
-            menuIndex  = menuIndex - 1 < 0 ? menuName.size() - 1 : menuIndex - 1;
+            menuIndex = menuIndex - 1 < 0 ? menuName.size() - 1 : menuIndex - 1;
         }
 
         if (find(keysPressed.begin(), keysPressed.end(), 115) != keysPressed.end()) // 115 - S
         {
-            menuIndex  = (menuIndex + 1) % menuName.size();
+            menuIndex = (menuIndex + 1) % menuName.size();
         }
         clear();
         for (int i = 0; i < menuName.size(); i++)
@@ -113,7 +115,8 @@ int main()
             {
                 name += to_wstring(*menuVar[i]);
             }
-            if (menuName[i] == L"Minimap:"){
+            if (menuName[i] == L"Minimap:")
+            {
                 name += mapStr;
             }
             const wchar_t *wname = name.c_str();
@@ -253,7 +256,8 @@ int main()
                 }
             }
 
-            int ceilingDistance = (int) ((float) (screenHeight / 2.0) - (float)screenHeight / ((float) distanceToWall));
+            int ceilingDistance = (int) ((float) (screenHeight / 2.0) -
+                                         (float) screenHeight / ((float) distanceToWall));
             int floorDistance = screenHeight - ceilingDistance;
 
             short shadeChar = ' ';
