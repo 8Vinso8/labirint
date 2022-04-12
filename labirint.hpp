@@ -55,7 +55,7 @@ void mazemake(int** maze, int height, int width){ //алгос лабиринт�
     int x, y, c, a;
     bool b;
 
-    for(int i = 0; i < height; i++) // Массив заполняется землей-ноликами
+    for(int i = 0; i < height; i++) // Массив заполняется ноликами
         for(int j = 0; j < width; j++)
             maze[i][j] = wall;
 
@@ -63,32 +63,38 @@ void mazemake(int** maze, int height, int width){ //алгос лабиринт�
     while(a < 10000){
         maze[y][x] = pass; a++;
         while(1){ // Бесконечный цикл, который прерывается только тупиком
-            c = rand()%4; // Напоминаю, что крот прорывает
-            switch(c){  // по две клетки в одном направлении за прыжок
-                case 0: if(y != 1)
-                        if(maze[y-2][x] == wall){ // вверх
-                            maze[y-1][x] = pass;
-                            maze[y-2][x] = pass;
-                            y-=2;
-                        }
-                case 1: if(y != height-2)
-                        if(maze[y+2][x] == wall){ // вниз
-                            maze[y+1][x] = pass;
-                            maze[y+2][x] = pass;
-                            y+=2;
-                        }
-                case 2: if(x != 1)
-                        if(maze[y][x-2] == wall){ // налево
-                            maze[y][x-1] = pass;
-                            maze[y][x-2] = pass;
-                            x-=2;
-                        }
-                case 3: if(x != width-2)
-                        if(maze[y][x+2] == wall){ // направо
-                            maze[y][x+1] = pass;
-                            maze[y][x+2] = pass;
-                            x+=2;
-                        }
+            c = rand()%4;
+            if(c == 0) {
+                if (y != 1)
+                    if (maze[y - 2][x] == wall) { // вверх
+                        maze[y - 1][x] = pass;
+                        maze[y - 2][x] = pass;
+                        y -= 2;
+                    }
+                }
+            if(c == 1) {
+                if (y != height - 2)
+                    if (maze[y + 2][x] == wall) { // вниз
+                        maze[y + 1][x] = pass;
+                        maze[y + 2][x] = pass;
+                        y += 2;
+                    }
+            }
+            if(c == 2) {
+                if (x != 1)
+                    if (maze[y][x - 2] == wall) { // налево
+                        maze[y][x - 1] = pass;
+                        maze[y][x - 2] = pass;
+                        x -= 2;
+                    }
+            }
+            if(c == 3) {
+                if (x != width - 2)
+                    if (maze[y][x + 2] == wall) { // направо
+                        maze[y][x + 1] = pass;
+                        maze[y][x + 2] = pass;
+                        x += 2;
+                    }
             }
             if(deadend(x,y,maze,height,width))//проверка на тупик
                 break;
