@@ -10,27 +10,26 @@
 
 using namespace std;
 
-int screenWidth = 180;
-int screenHeight = 60;
-
-int mapWidth = 17;
-int mapHeight = 17;
-
-int FPS = 60;
-
-float playerX = 2;
-float playerY = 2;
-float playerAngle = 0.0;
-float fov = numbers::pi / 4.0;
-float playerSpeed = 0.05f;
-
-int renderDistance = 17.0;
-bool miniMap = true;
-wstring mapStr = L"YES";
-
-
 int main()
 {
+    int screenWidth = 180;
+    int screenHeight = 60;
+
+    int mapWidth = 17;
+    int mapHeight = 17;
+
+    int FPS = 60;
+
+    float playerX = 2;
+    float playerY = 2;
+    float playerAngle = 0.0;
+    float fov = numbers::pi / 4.0;
+    float playerSpeed = 0.05f;
+
+    int renderDistance = 17.0;
+    bool miniMap = true;
+    wstring mapStr = L"YES";
+
     auto *screen = new wchar_t[screenWidth * screenHeight];
     HANDLE console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
                                                0,
@@ -210,13 +209,13 @@ int main()
             float eyeX = sinf(rayAngle);
             float eyeY = cosf(rayAngle);
 
-            while (!hitWall && distanceToWall < renderDistance)
+            while (!hitWall and distanceToWall < renderDistance)
             {
                 distanceToWall += stepSize;
                 int testX = (int) (playerX + eyeX * distanceToWall);
                 int testY = (int) (playerY + eyeY * distanceToWall);
 
-                if (testX < 0 || testX >= mapWidth || testY < 0 || testY >= mapHeight)
+                if (testX < 0 or testX >= mapWidth or testY < 0 or testY >= mapHeight)
                 {
                     hitWall = true;
                     distanceToWall = renderDistance;
