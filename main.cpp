@@ -24,7 +24,9 @@ float playerAngle = 0.0;
 float fov = numbers::pi / 4.0;
 float playerSpeed = 0.1f;
 
-float renderDistance = 16.0;
+int renderDistance = 16.0;
+bool miniMap = true;
+wstring mapStr = L"YES";
 
 int main()
 {
@@ -46,9 +48,10 @@ int main()
 
     int menuIndex = 0;
 
-    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " };
-    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     };
-    vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                };
+    vector<wstring>menuName =   {L"Start",  L"MapWidth: ",      L"MapHeight: ",     L"FPS: ",    L"ScreenWidth: ",    L"ScreenHeight: " , L"RenderDistance:", L"Minimap:"};
+    vector<int*>menuVar =       {nullptr,   &mapWidth,          &mapHeight,         &FPS,        &screenWidth,        &screenHeight     , &renderDistance,
+                                 nullptr};
+    vector<int>increment =      {NULL,      2,                  2,                  30,          10,                  10                , 2, NULL};
 
     while(runGame)
     {
@@ -61,12 +64,16 @@ int main()
             keysPressed.push_back(c);
         }
 
-        if (find(keysPressed.begin(), keysPressed.end(), 10) != keysPressed.end())  // 27 - ESC
+        if (find(keysPressed.begin(), keysPressed.end(), 10) != keysPressed.end())  // 10 - ENTER
         {
             if (menuName[menuIndex] == L"Start")
             {
                 runGame = false;
                 continue;
+            }
+            if (menuName[menuIndex] == L"Minimap:"){
+                mapStr = mapStr == L"YES" ? L"NO" : L"YES";
+                miniMap = mapStr == L"YES";
             }
         }
 
@@ -105,6 +112,9 @@ int main()
             if (menuVar[i] != nullptr)
             {
                 name += to_wstring(*menuVar[i]);
+            }
+            if (menuName[i] == L"Minimap:"){
+                name += mapStr;
             }
             const wchar_t *wname = name.c_str();
             mvaddwstr(i, 0, wname);
@@ -282,14 +292,15 @@ int main()
                 }
             }
         }
-
-        for (int nx = 0; nx < mapWidth; nx++)
-            for (int ny = 0; ny < mapHeight; ny++)
-            {
-                screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
-            }
-        screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
-
+        if (miniMap)
+        {
+            for (int nx = 0; nx < mapWidth; nx++)
+                for (int ny = 0; ny < mapHeight; ny++)
+                {
+                    screen[(ny + 1) * screenWidth + nx] = map[ny * mapWidth + nx];
+                }
+            screen[((int) playerX + 1) * screenWidth + (int) playerY] = 'P';
+        }
         mvaddwstr(0, 0, screen);
 
         wstring fps = to_wstring((int) (1.0f / fElapsedTime));
